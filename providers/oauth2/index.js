@@ -1,8 +1,10 @@
 var ClientOAuth2 = require('client-oauth2');
 var OAuth2Autograph = function(baseUrl, definition,options) {
 	this.baseUrl = baseUrl;
+	if (options == undefined)
+		options = definition;
 	 var grantTypes = [];
-	if (definition.flow == 'accessCode') {
+	if (!definition.flow || definition.flow == 'accessCode') {
 		grantTypes.push('code');
 	}
 	this.supportsRefresh = true;
