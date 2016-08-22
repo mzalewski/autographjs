@@ -27,7 +27,7 @@ Examples on how to use other libraries  to obtain these tokens (eg Passport) wil
 * OAuth Base - If a specific OAuth API is not supported, the generic OAuth provider can be used instead. (Examples coming soon)
 * Swagger Compatible - Use the Swagger Provider generator to automatically add support for any OpenAPI/Swagger specification (Examples coming soon)
 
-Basic example:
+###Basic example:
 
 ```js
 // Set up autograph
@@ -51,7 +51,8 @@ var getRepoRequest = request('https://api.bitbucket.org/2.0/repositories/usernam
 
 ```
 
-Digest authentication: 
+###Digest authentication:
+
 Digest requires a 401 response from the server before signing can happen - Autograph makes this easy
 
 ```js
@@ -75,7 +76,7 @@ var getRepoRequest = request('https://yourserver.com/digest_protected_url',funct
 
 ```
 
-Custom OAuth2 provider
+###Custom OAuth2 provider
 ```js
 var OAuth2AutographProvider = require('./providers/oauth2');
 // Create a custom OAuth2 provider
