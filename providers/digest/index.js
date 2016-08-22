@@ -1,5 +1,10 @@
 var DigestAutograph = function(baseUrl, definition,options) {
 	var self = this;
+	this.handle401 = function(response,request) { 
+
+	this.setAuthChallenge(response.headers['www-authenticate']); 
+	return this._doSignRequest(request);
+}.bind(this);
 	var util = require('util');
 	var crypto = require('crypto');
 	this.baseUrl = baseUrl;
@@ -31,7 +36,7 @@ return challenge;
 		return this.cnonce;
 	}
 	this.setAuthChallenge = function(challenge) {
-		this._parseChallenge(challenge);
+		this.challenge = _parseChallenge(challenge);
 	}	
 	this.nc = 0;
 	this.nextNonceCount = function() { 

@@ -2,6 +2,19 @@ var AutographRequestMapper = require('./requestMapper');
 var uuid = require('node-uuid');
 var Autograph = function() { 
 	this._configuredProviders = {};
+	this.autograph = this;
+};
+
+Autograph.connectors = Autograph.prototype.connectors = require('./connectors.js');
+Autograph.prototype.connect = function(wrapped, connector) { 
+	for (var cIndex in this.connectors) { 
+		var c = this.connectors[cIndex];
+		var result = c(this, wrapped);
+		if (result) {
+			return result;		
+		}
+	}
+	return false;
 };
 Autograph.prototype.use = function(provider) { 
 	var name = provider.name;
@@ -18,8 +31,11 @@ Autograph.prototype.getSupportedProvider = function(request) {
         }
 	return null;
 }
-Autograph.prototype.canSignRequest = function(request, providerName) { 
- 	var requestToSign = this.requestMapper.mapFrom(request);
+Autograph.prototype.canSignRequest = function(request, opt) { 
+	 var providerName = opt.providerName || false;
+        var connector = opt.connector || false;
+        
+ 	var requestToSign = connector.mapFrom(request);
         var autographProvider = false;
         if (providerName) {
                 autographProvider = this._configuredProviders[providerName];
@@ -32,24 +48,29 @@ Autograph.prototype.canSignRequest = function(request, providerName) {
         }
 	return true;
 };
-Autograph.prototype.signRequest = function(request, providerName) { 
-	var requestToSign = this.requestMapper.mapFrom(request);
+Autograph.prototype.signRequest = function(request, opt, silent) {
+	 
+	var providerName = opt.providerName || false;
+	var connector = opt.connector || false;
+	var requestToSign = connector.mapFrom(request);
 	var autographProvider = false;
 	if (providerName) {
 		autographProvider = this._configuredProviders[providerName];
-		if (!autographProvider)
+		if (!autographProvider && !silent)
 			throw Error("Invalid Provider Name");
-		if (!autographProvider.canSignRequest(requestToSign))
+		if (!autographProvider.canSignRequest(requestToSign) && !silent)
 			throw Error("Request not supported by provider");	
 	} else {
 		autographProvider = this.getSupportedProvider(requestToSign);
-		if (!autographProvider)
+		if (!autographProvider && !silent)
                         throw Error("No supported providers");
 	}
-	if (autographProvider.handle401)
-		this.requestMapper.setup401Handler(request,autographProvider.handle401);
+	if (!autographProvider)
+		return;
+	if (autographProvider.handle401 && connector.setup401Handler)
+		connector.setup401Handler(request,autographProvider.handle401);
 	var signedRequest = autographProvider.signRequest(requestToSign);
-	return this.requestMapper.mapTo(request,signedRequest);
+	return connector.mapTo(request,signedRequest);
 };
 
 var OAuth1 = require('./providers/oauth1');
