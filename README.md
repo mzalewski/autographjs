@@ -1,7 +1,14 @@
 # AutographJS
 Simple auth request signing
 
-This library was created to simplify the signing of requests targeting APIs. Currently only basic oAuth 2.0 support but I plan to implement all the major authentication methods.
+This library was created to simplify the signing of requests targeting APIs. 
+###Auth method support
+* Basic 
+* Digest
+* OAuth 1.0 (incomplete)
+* OAuth2
+* API Key (incomplete)
+* JWT (basic, non-oauth)
 
 Providers add support for specific APIs. (Currently only Bitbucket).
 
