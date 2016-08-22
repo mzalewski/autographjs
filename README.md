@@ -48,3 +48,17 @@ Autograph.signRequest( getRepoRequest );
 
 ```
 
+Custom OAuth2 provider
+```js
+var OAuth2AutographProvider = require('./providers/oauth2');
+// Create a custom OAuth2 provider
+var customProvider = new OAuth2AutographProvider("https://api.customurl/v2",{
+   tokenUrl: "https://customurl/access_token_url",
+   authorizationUrl: "http://customurl/authorization_url",
+   clientId: 'myclientid',
+   clientSecret: 'myclientsecret',
+   accessToken: 'mytoken',
+   refreshToken: 'validrefreshtoken'
+  });
+  // Configure Autograph to use the custom provider
+  Autograph.use(customProvider); 
