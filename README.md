@@ -115,6 +115,8 @@ var request = Autograph.signRequest({ url: 'https://api.bitbucket.org/2.0/reposi
 
 // Finally, build http.request from the signed Request object
 // In this example, we're using Node's HTTP module
+// Note: You will have to manually handle 401 responses by calling provider.handle401(response, request). Not all providers support handle401, so you'll need to check it exists.
+
 var path = request.uri.path + '?' + require('querystring').stringify(request.qs);
 http.request({ 
    protocol: request.uri.protocol, 
@@ -130,3 +132,4 @@ var data = '';
    console.log("Response received", data);
   });
 });
+
