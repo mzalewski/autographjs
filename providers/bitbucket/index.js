@@ -9,8 +9,12 @@ var BitbucketAutograph = function() {
               OAuth2Autograph.call(this,self.baseUrl, self.getDefinition()['oauth2'], opts);
 	      this.name = "bitbucket-oauth2";
 	}
-
-        this.getMethods = function() { return ['OAuth2']; };
+	this.Basic = function(opts) { 
+		var BasicAutograph = require('../basic');
+		BasicAutograph.call(this,self.baseUrl, {}, opts);
+		this.name = 'bitbucket-basic';
+	}
+        this.getMethods = function() { return ['OAuth2','Basic']; };
 }
 
 module.exports = new BitbucketAutograph;
