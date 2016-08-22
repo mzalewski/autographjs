@@ -20,10 +20,12 @@ Examples on how to use other libraries  to obtain these tokens (eg Passport) wil
 
 ## Goals
 
- Inspired by Passport, Autograph aims to make signing API requests as simple as possible - once configured, a single call to signRequest should be all that is required to sign any HTTP request. Like Passport, providers will (eventually) be split into their own modules - making it easy to use community-created providers. 
+ Inspired by Passport, Autograph aims to make signing API requests as simple as possible - once configured, a single call to Autograph.signRequest or Autograph.connect should be all that is required to sign any HTTP request. 
+ Like Passport, providers and connectors will (eventually) be split into their own modules - making it easy to use community-created extensions. 
 
 ### Features
 * Providers - Providers know how to sign a request for a specific API and can determine whether or not they support the specified request. Multiple methods (JWT, OAuth, Basic) can be supported by a single provider. They are designed to be independent and do not rely on any Autograph core functionality - eventually it will be possible to use them without requiring the Autograph library at all (though Autograph will still be useful for managing multiple providers and integrating with request transport libraries). 
+* Connectors - Connectors integrate with various HTTP request libraries, automating request signing and 401 handling. Currently we provide a connector for the "request" module, but we plan to support all major libraries out of the box. 
 * OAuth Base - If a specific OAuth API is not supported, the generic OAuth provider can be used instead. (Examples coming soon)
 * Swagger Compatible - Use the Swagger Provider generator to automatically add support for any OpenAPI/Swagger specification (Examples coming soon)
 
