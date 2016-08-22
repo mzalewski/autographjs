@@ -33,25 +33,45 @@ Basic example:
 // Set up autograph
 var Autograph = require('./index.js');
 
-// Use the RequestMapper for the "request" module
-var requestMapper = require('./requestMapper.js').request;
-Autograph.requestMapper = new requestMapper();
-
-// Set up bitbucket
+// Set up bitbucket Provider
 var BitbucketAutograph = require('./providers/bitbucket');
-Autograph.use(bb = new BitbucketAutograph.OAuth2({
+Autograph.use(new BitbucketAutograph.OAuth2({
         clientId: 'BITBUCKET_CLIENT_ID',
         clientSecret: 'BITBUCKET_CLIENT_SECRET',
         accessToken: 'BITBUCKET_ACCESS_TOKEN'
 }));
 
-var request = require('request');
+// Wrap the request module 
+var request = Autograph.connect(require('request'));
 
+// That's it - now send a request and it will be automatically signed
 var getRepoRequest = request('https://api.bitbucket.org/2.0/repositories/username',function(error, response) {
         console.log("Response",response.body);
 });
 
-Autograph.signRequest( getRepoRequest );
+```
+
+Digest authentication: 
+Digest requires a 401 response from the server before signing can happen - Autograph makes this easy
+
+```js
+// Set up autograph
+var Autograph = require('./index.js');
+
+// Set up digest Provider
+var DigestAutograph = require('./providers/digest');
+Autograph.use(new DigestAutograph('https://yourserver.com',{
+        userName: 'myUserName',
+        password: 'myPassword'
+}));
+
+// Wrap the request module 
+var request = Autograph.connect(require('request'));
+
+// Send the request - autograph will automatically handle the 401 and then sign the request
+var getRepoRequest = request('https://yourserver.com/digest_protected_url',function(error, response) {
+        console.log("Response",response.body);
+});
 
 ```
 
