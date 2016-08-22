@@ -113,7 +113,8 @@ var http = require('http');
 // Call signRequest on request object 
 var request = Autograph.signRequest({ url: 'https://api.bitbucket.org/2.0/repositories/username' });
 
-// Finally, build http.request
+// Finally, build http.request from the signed Request object
+// In this example, we're using Node's HTTP module
 var path = request.uri.path + '?' + require('querystring').stringify(request.qs);
 http.request({ 
    protocol: request.uri.protocol, 
