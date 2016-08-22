@@ -90,3 +90,42 @@ var customProvider = new OAuth2AutographProvider("https://api.customurl/v2",{
   });
   // Configure Autograph to use the custom provider
   Autograph.use(customProvider); 
+```
+
+
+### Custom request library
+If you're not using a supported request library, you can still use Autograph
+```js
+
+// Set up autograph
+var Autograph = require('./index.js');
+
+// Set up bitbucket Provider
+var BitbucketAutograph = require('./providers/bitbucket');
+Autograph.use(new BitbucketAutograph.OAuth2({
+        clientId: 'BITBUCKET_CLIENT_ID',
+        clientSecret: 'BITBUCKET_CLIENT_SECRET',
+        accessToken: 'BITBUCKET_ACCESS_TOKEN'
+}));
+
+var http = require('http');
+
+// Call signRequest on request object 
+var request = Autograph.signRequest({ url: 'https://api.bitbucket.org/2.0/repositories/username' });
+
+// Finally, build http.request
+var path = request.uri.path + '?' + require('querystring').stringify(request.qs);
+http.request({ 
+   protocol: request.uri.protocol, 
+   host: request.uri.host, 
+   path: path,
+   headers: request.headers
+}, function(response) { 
+var data = '';
+  response.on('data',function(chunk) { 
+   data += chunk;
+  });
+  response.on('end', function() { 
+   console.log("Response received", data);
+  });
+});
