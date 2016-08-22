@@ -1,4 +1,4 @@
-var AutographRequestMapper = require('./requestMapper.js');
+var AutographRequestMapper = require('./requestMapper');
 var uuid = require('node-uuid');
 var Autograph = function() { 
 	this._configuredProviders = {};
@@ -46,6 +46,8 @@ Autograph.prototype.signRequest = function(request, providerName) {
 		if (!autographProvider)
                         throw Error("No supported providers");
 	}
+	if (autographProvider.handle401)
+		this.requestMapper.setup401Handler(request,autographProvider.handle401);
 	var signedRequest = autographProvider.signRequest(requestToSign);
 	return this.requestMapper.mapTo(request,signedRequest);
 };

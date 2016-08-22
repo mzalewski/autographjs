@@ -30,12 +30,9 @@ return challenge;
 		this.nc = 0;
 		return this.cnonce;
 	}
-	this.sign401Request = function(response, request) {
-		var authheader = _parseChallenge(response.headers['www-authenticate']);
-		self.challenge = authheader;
-		return self._doSignRequest(request);			
-	}
-	
+	this.setAuthChallenge = function(challenge) {
+		this._parseChallenge(challenge);
+	}	
 	this.nc = 0;
 	this.nextNonceCount = function() { 
 		this.nc++;
@@ -91,8 +88,6 @@ return challenge;
 	this.signRequest = function(request) { 
 		if (this.challenge)
 			this._doSignRequest(request);
-		else
-			request.statusHandler['401'] = this.sign401Request;
 		return request;
 	}
 	this.canSignRequest = function(request) { 
