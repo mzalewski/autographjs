@@ -5,7 +5,7 @@ var Autograph = function() {
 	this.autograph = this;
 };
 
-Autograph.connectors = Autograph.prototype.connectors = require('./connectors.js');
+Autograph.connectors = Autograph.prototype.connectors = require('./connectors');
 Autograph.prototype.connect = function(wrapped, connector) { 
 	for (var cIndex in this.connectors) { 
 		var c = this.connectors[cIndex];

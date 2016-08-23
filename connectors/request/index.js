@@ -71,6 +71,4 @@ RequestConnector.prototype.mapFrom = function(request) {
                 return mapped;
 
 };
-module.exports = { 
-	'request': RequestConnector.create
-};
+module.exports = RequestConnector;
