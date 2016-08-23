@@ -1,11 +1,14 @@
-var AutographRequestMapper = require('./requestMapper');
 var uuid = require('node-uuid');
 var Autograph = function() { 
 	this._configuredProviders = {};
 	this.autograph = this;
 };
+Autograph.core = require('autograph-core');
+Autograph.prototype.providers = Autograph.providers = require('./providers');
+Autograph.prototype.connectors = Autograph.connectors = require('./connectors');
 
-Autograph.connectors = Autograph.prototype.connectors = require('./connectors');
+
+
 Autograph.prototype.connect = function(wrapped, provider) { 
 	for (var cIndex in this.connectors) { 
 		var c = this.connectors[cIndex];
@@ -23,7 +26,7 @@ Autograph.prototype.use = function(provider) {
 		
 	this._configuredProviders[name] = provider;
 }
-Autograph.prototype.requestMapper = new AutographRequestMapper();
+
 Autograph.prototype.getSupportedProvider = function(request) { 
 	for (var key in this._configuredProviders) {
 		if(this._configuredProviders[key].canSignRequest(request))
@@ -67,13 +70,5 @@ Autograph.prototype.signRequest = function(request, connector) {
 	return connector.mapTo(request,signedRequest);
 };
 
-var OAuth1 = require('./providers/oauth1');
-var OAuth2 = require('./providers/oauth2');
-var Swagger = require('./providers/swagger');
-
 module.exports = Autograph;
 
-Autograph.providers = {};
-Autograph.providers.OAuth1 = OAuth1;
-Autograph.providers.OAuth2 = OAuth2;
-Autograph.providers.SwaggerGenerator = Swagger;

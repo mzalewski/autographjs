@@ -1,3 +1,4 @@
+var core = require('autograph-core');
 var RequestProxy = require('./requestproxy');
 var querystring = require('querystring');
 function AutographRequestOverride(options) { 
@@ -8,7 +9,8 @@ function AutographRequestOverride(options) {
           this._autographConnector.autograph.signRequest(this, this._autographConnector);
 }
 var RequestConnector = function(autograph,request) {
-
+	if (request == undefined)
+		request = require('request');
         this.request = request;
 	this.autograph = autograph;
 	this.proxyRequest = new RequestProxy(request, AutographRequestOverride);
@@ -16,15 +18,11 @@ var RequestConnector = function(autograph,request) {
 
         AutographRequestOverride.prototype._autographConnector = this;
 
-	return;
-	this.proxyRequest = function() { console.log("Ok lets go",pr.Request);return request.apply(pr,arguments); };
-        this.autograph = autograph;
-	Object.assign(this.proxyRequest,request);
-        require('util').inherits(AutographRequestOverride, this.proxyRequest.Request);
-        this.proxyRequest.Request = AutographRequestOverride;
-        AutographRequestOverride.prototype._autographConnector = this;
 };
-RequestConnector.prototype.handleResponse = function(original, response) {
+
+RequestConnector.prototype = {
+	proxy: function() { return this.proxyRequest; },
+	handleResponse: function(original, response) {
 	self = this, args= arguments;
 	var request = response.request;
 	if (response.statusCode == "401" && request._autographConnector.error401Handler) { 
@@ -43,25 +41,9 @@ RequestConnector.prototype.handleResponse = function(original, response) {
 	}
 	return original(response);
 
-};
-RequestConnector.connect = function(autograph,original) {
-  if (original == undefined) {
-	return new RequestConnector(autograph, require('request')).proxyRequest;
-  }
-  // autograph is either a provider or an Autograph object - methods should be identical
-  var selfConnector = this;
-  if (typeof original === "function" &&  original.get && original.Request)
-  {
-	return new RequestConnector(autograph, original).proxyRequest;
-  }
-  return false;
-
-};
-
-RequestConnector.prototype.setup401Handler = function(request, handler) { 
+}, setup401Handler:  function(request, handler) { 
 	this.error401Handler = handler;
-};
-RequestConnector.prototype.mapTo = function(originalRequest, newRequest) { 
+}, mapTo:  function(originalRequest, newRequest) { 
  		if (newRequest.qs)
                 for (var key in newRequest.qs) {
                         originalRequest.qs(key,newRequest[key]);
@@ -72,8 +54,7 @@ RequestConnector.prototype.mapTo = function(originalRequest, newRequest) {
                 }
                 return originalRequest;
 
-};
-RequestConnector.prototype.mapFrom = function(request) { 
+}, mapFrom: function(request) { 
                 var uri = request.uri;
                 var mapped = {
                         method: request.method,
@@ -82,6 +63,12 @@ RequestConnector.prototype.mapFrom = function(request) {
                         headers: request.headers
                 };
                 return mapped;
-
+}
 };
+
+core.Connector.subclass(RequestConnector);
+
+RequestConnector.canConnect = function(request) {
+        return request.Request && request.get;
+}; 
 module.exports = RequestConnector.connect;
