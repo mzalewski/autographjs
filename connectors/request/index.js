@@ -1,17 +1,27 @@
+var RequestProxy = require('./requestproxy');
 var querystring = require('querystring');
 function AutographRequestOverride(options) { 
-	  var monkeypatch = require('monkeypatch');
+	console.log("calling override")
+//	  var monkeypatch = require('monkeypatch');
           AutographRequestOverride.super_.call(this,options);
-	  monkeypatch(this._redirect,'redirectTo',this._autographConnector.handleResponse);
-          this._autographConnector.autograph.signRequest(this, { connector: this._autographConnector },true);
+//	  monkeypatch(this._redirect,'redirectTo',this._autographConnector.handleResponse);
+          this._autographConnector.autograph.signRequest(this, this._autographConnector);
 }
 var RequestConnector = function(autograph,request) {
-        this.request = request;
-        this.request._autographConnector = this;
-        this.autograph = autograph;
-        require('util').inherits(AutographRequestOverride, this.request.Request);
 
-        this.request.Request = AutographRequestOverride;
+        this.request = request;
+	this.autograph = autograph;
+	this.proxyRequest = new RequestProxy(request, AutographRequestOverride);
+	require('util').inherits(AutographRequestOverride, request.Request);
+
+        AutographRequestOverride.prototype._autographConnector = this;
+
+	return;
+	this.proxyRequest = function() { console.log("Ok lets go",pr.Request);return request.apply(pr,arguments); };
+        this.autograph = autograph;
+	Object.assign(this.proxyRequest,request);
+        require('util').inherits(AutographRequestOverride, this.proxyRequest.Request);
+        this.proxyRequest.Request = AutographRequestOverride;
         AutographRequestOverride.prototype._autographConnector = this;
 };
 RequestConnector.prototype.handleResponse = function(original, response) {
@@ -34,12 +44,15 @@ RequestConnector.prototype.handleResponse = function(original, response) {
 	return original(response);
 
 };
-RequestConnector.create = function(autograph,original) {
+RequestConnector.connect = function(autograph,original) {
+  if (original == undefined) {
+	return new RequestConnector(autograph, require('request')).proxyRequest;
+  }
+  // autograph is either a provider or an Autograph object - methods should be identical
   var selfConnector = this;
   if (typeof original === "function" &&  original.get && original.Request)
   {
-    original._autographConnector = new RequestConnector(autograph, original);
-    return original;
+	return new RequestConnector(autograph, original).proxyRequest;
   }
   return false;
 
@@ -71,4 +84,4 @@ RequestConnector.prototype.mapFrom = function(request) {
                 return mapped;
 
 };
-module.exports = RequestConnector;
+module.exports = RequestConnector.connect;

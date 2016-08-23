@@ -1,10 +1,12 @@
-function HTTPConnector(autograph, http) { 
-
-var util = require('util');
-var url = require('url');
-this.autograph = autograph;
-var baseRequest = http.request;
-http.request = function (options, cb) {
+var EventEmitter = require('events').EventEmitter;
+class HTTPConnector extends EventEmitter { 
+	constructor(autograph, http) { 
+		super();
+		var util = require('util');
+		var url = require('url');
+		this.autograph = autograph;
+		var baseRequest = http.request;
+		http.request = function (options, cb) {
   if (util.isString(options)) {
     options = {
       href: options,
@@ -17,9 +19,29 @@ http.request = function (options, cb) {
   }
   options = http._autographConnector.autograph.signRequest(options, { connector: http._autographConnector },true);
 
-  return baseRequest(options, cb);
-};
+  var internalRequest = baseRequest(options, cb);
+  internalRequest.on('response', function(res) { 
+	console.log("GOT CODE", res.statusCode);
+  });
+  internalRequest.__emit = internalRequest.emit;
+  internalRequest.emit = function(eventName, data) { 
+	console.log("EVENT",eventName);
+	if (true || eventName == "response" || eventName == "close")
+	{
+		var self = this;
+		var args= arguments;
+	//setTimeout(function() { 
+self.emit.apply(self,args); //}, 0);
+		return;
+	} 
+	this.emit.apply(this,arguments);
+	return;
+  }
+  return internalRequest;
+  };
 http._autographConnector = this;
+}
+
 }
 HTTPConnector.create = function(autograph, httpModule) { 
   var selfConnector = this;

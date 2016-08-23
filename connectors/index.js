@@ -1,4 +1,4 @@
 module.exports = { 
-	'request': require('./request').create,
-	'http': require('./http').create
+	'request': require('./request'),
+	'http': require('./http')
 };

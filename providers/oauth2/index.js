@@ -44,20 +44,28 @@ var OAuth2Autograph = function(baseUrl, definition,options) {
 		console.log(request);
 	}
 
-	this.signRequest = function(request) { 
+	this.signRequest = function(request, connector) {
+		var requestToSign = request;
+		if (connector) {
+			requestToSign = connector.mapFrom(request);
+		} 
 		if ( !this.token || !this.token.accessToken )
 			throw Error("Access Token Missing");
-		// Request should be: {method:,url:,body:,qs:,headers:}
-		//		var signedUrl = this.oauth.signUrl(request.url,this._data.accessToken,this._data.tokenSecret,request.method);
-		this.token.sign(request);
-		var urlParts = request.url.split('?');
+		this.token.sign(requestToSign);
+		var urlParts = requestToSign.url.split('?');
 		if (urlParts.length > 1) {
 			var qsParts = require('querystring').parse(urlParts[1]);		
 			
 			for (var key in qsParts)
-				request.qs[key] = qsParts[key];
+				requestToSign.qs[key] = qsParts[key];
 		}
-		request.url = urlParts[0];
+		requestToSign.url = urlParts[0];
+		if (connector) {
+			request = connector.mapTo(request, requestToSign);
+		} else { 
+			request = requestToSign;
+		}
+		
 		return request; // Return request object containing changes
 	}
 	this.canSignRequest = function(request) { 
