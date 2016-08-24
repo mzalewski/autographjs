@@ -135,3 +135,30 @@ var data = '';
   });
 });
 
+```
+
+# Usage outside of AutographJS
+If you want to use the authentication providers but don't want to rely on Autograph, you can set up the provider manually.
+Using this method will remove the dependency on AutographJS
+
+```js
+
+// Using the Provider by itself
+var BitbucketAutographProvider = require('autograph-provider-bitbucket');
+var bitbucketSign = new BitbucketAutographProvider({ ... });
+
+var req = request.get("https://bitbucket.org/api/call", function() { ... });
+bitbucketSign(req);
+
+// Using the provider with a connector directly
+var BitbucketAutographProvider = require('autograph-provider-bitbucket');
+var RequestConnector = require('autograph-connector-request');
+
+var bitbucketSign = new BitbucketAutographProvider({ ... });
+// Connect the Provider - the request module will be configured automatically
+var request = RequestConnector.connect(bitbucketSign);
+
+request.get("https://bitbucket.org/api/call", function() { ... });
+
+
+```
