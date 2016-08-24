@@ -17,7 +17,7 @@ Autograph.prototype.connect = function(wrapped, provider) {
 			return result;		
 		}
 	}
-	return false;
+	return wrapped;
 };
 Autograph.prototype.use = function(provider) { 
 	var name = provider.name;
