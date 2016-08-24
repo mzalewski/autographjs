@@ -27,47 +27,22 @@ Autograph.prototype.use = function(provider) {
 	this._configuredProviders[name] = provider;
 }
 
-Autograph.prototype.getSupportedProvider = function(request) { 
+Autograph.prototype.getSupportedProvider = function(requestData) { 
 	for (var key in this._configuredProviders) {
-		if(this._configuredProviders[key].canSignRequest(request))
+		if(this._configuredProviders[key].canSignRequest(requestData))
 			return this._configuredProviders[key];
         }
 	return null;
 }
-Autograph.prototype.canSignRequest = function(request, opt) { 
-	 var providerName = opt.providerName || false;
-        var connector = opt.connector || false;
-        
- 	var requestToSign = connector.mapFrom(request);
-        var autographProvider = false;
-        if (providerName) {
-                autographProvider = this._configuredProviders[providerName];
-		if (!autographProvider || !autoGraphProvider.canSignRequest(requestToSign))
-			return false;
-        } else {
-                autographProvider = this.getSupportedProvider(requestToSign);
-                if (!autographProvider)
-			return false;
-        }
-	return true;
+Autograph.prototype.canSignRequest = function(requestData) { 
+	return this.getSupportedProvider(requestData) !== null;
 };
-Autograph.prototype.signRequest = function(request, connector) {
-	 var requestToSign = request;
-	if (connector)
-		requestToSign = connector.mapFrom(request);
-	var autographProvider = this.getSupportedProvider(requestToSign);
+Autograph.prototype.signRequest = function(requestData) {
+	var autographProvider = this.getSupportedProvider(requestData);
 	if (!autographProvider)
 		return;
 	
-	if (autographProvider.handle401 && connector.setup401Handler)
-		connector.setup401Handler(request,autographProvider.handle401);
-
-	
-	var signedRequest = autographProvider.signRequest(requestToSign);
-	if (!connector)
-		return signedRequest;
-	
-	return connector.mapTo(request,signedRequest);
+	autographProvider.signRequest(requestData);
 };
 
 module.exports = Autograph;
